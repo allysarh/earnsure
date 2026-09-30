@@ -19,7 +19,8 @@ def test_demo_flow(client):
 
     items = client.get("/api/confirmations").json()["items"]
     assert items[0]["description"] == "FROM T NGUYEN"
-    assert client.post(f"/api/confirmations/{items[0]['txn_id']}", json={"category": "one_off_personal"}).status_code == 200
+    saved = client.post(f"/api/confirmations/{items[0]['txn_id']}", json={"category": "one_off_personal"})
+    assert saved.status_code == 200
     assert client.get("/api/streams").json()["needs_check"] == 2
 
     h = client.get("/api/health").json()

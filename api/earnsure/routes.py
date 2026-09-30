@@ -304,7 +304,8 @@ def _snapshot(sid: str, body: ProofIn, token: str, statement_no: str, issued: da
 
 
 def _share_url(token: str) -> str | None:
-    domain = os.environ.get("APP_DOMAIN")
+    # Tolerate "https://" prefixes and trailing slashes in the env value
+    domain = os.environ.get("APP_DOMAIN", "").strip().removeprefix("https://").removeprefix("http://").strip("/")
     return f"https://{domain}/p/{token}" if domain else None
 
 

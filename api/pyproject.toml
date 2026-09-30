@@ -1,3 +1,19 @@
+# Vercel builds the Python service from this file (with uv), so the runtime
+# dependencies live here. Keep requirements.txt in sync for local pip installs.
+[project]
+name = "earnsure-api"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "numpy",
+    "supabase",
+    "tzdata",
+]
+
+[tool.vercel]
+entrypoint = "index:app"
+
 [tool.ruff]
 line-length = 120
 target-version = "py312"
@@ -6,7 +22,7 @@ target-version = "py312"
 select = ["E", "F", "B", "UP", "DTZ", "RUF"]
 # E402: index.py adjusts sys.path before imports; RUF001/003: "–" and "·" are intended copy;
 # B008: FastAPI's Depends()/Cookie() defaults
-ignore = ["E402", "RUF001", "RUF003", "B008"]
+ignore = ["E402", "RUF001", "RUF002", "RUF003", "B008"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

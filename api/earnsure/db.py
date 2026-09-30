@@ -126,7 +126,9 @@ class SupabaseStore:
 
 @lru_cache(maxsize=1)
 def get_store():
-    url, key = os.environ.get("SUPABASE_URL"), os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+    url, key = os.environ.get("SUPABASE_URL", "").strip(), os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
     if url and key:
-        return SupabaseStore(url, key)
+        # Accept the REST endpoint too: the client wants the bare project URL
+        return SupabaseStore(url.split("/rest/v1")[0].rstrip("/"), key)
+    print("SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY not set: using the in-memory store")
     return MemoryStore()
