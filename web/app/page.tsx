@@ -17,7 +17,8 @@ export default function Welcome() {
   }, []);
 
   return (
-    <div className="flex min-h-dvh flex-col gap-[26px] px-5 pb-8 pt-6">
+    // Spacing and heading scale with screen height so both buttons fit on one phone screen
+    <div className="flex min-h-dvh flex-col gap-[clamp(10px,1.8dvh,26px)] px-5 pt-3">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Logo />
@@ -29,37 +30,38 @@ export default function Welcome() {
         </button>
       </div>
 
-      <div className="mt-2 flex flex-col gap-3.5">
-        <h1 className="m-0 text-[40px] leading-[1.06] tracking-[-0.035em]">Financial intelligence for irregular earners</h1>
-        <p className="m-0 text-[16px] leading-[1.55] text-muted">
+      <div className="flex flex-col gap-2.5">
+        <h1 className="m-0 text-[clamp(26px,4.2dvh,40px)] leading-[1.08] tracking-[-0.035em]">Financial intelligence for irregular earners</h1>
+        <p className="m-0 text-[15px] leading-[1.45] text-muted">
           We turn your income activity into one verified page a landlord can trust, with no payslip needed.
         </p>
       </div>
 
-      <div className="flex flex-col gap-4 rounded-card border border-hair bg-white p-5 shadow-card">
+      <div className="flex flex-col gap-2.5 rounded-card border border-hair bg-white p-4 shadow-card">
         <div className="text-[14px] font-medium text-muted">How it works</div>
         {STEPS.map((s) => (
           <div key={s.n} className="flex items-center gap-3.5">
-            <IconCircle className={`${s.bg} text-[15px] font-semibold`}>{s.n}</IconCircle>
+            <IconCircle size={40} className={`${s.bg} text-[15px] font-semibold`}>{s.n}</IconCircle>
             <div>
-              <div className="text-[16px] font-medium tracking-[-0.01em]">{s.title}</div>
-              <div className="text-[14px] leading-[1.45] text-muted">{s.body}</div>
+              <div className="text-[15px] font-medium tracking-[-0.01em]">{s.title}</div>
+              <div className="text-[13px] leading-[1.4] text-muted">{s.body}</div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="flex items-center gap-3 rounded-tile bg-soft py-3 pl-3 pr-4 text-[14px] leading-[1.45] text-sub">
-        <IconCircle size={40} className="border border-field-line bg-white">
+      <div className="flex items-center gap-3 rounded-tile bg-soft py-2.5 pl-3 pr-4 text-[13px] leading-[1.4] text-sub">
+        <IconCircle size={36} className="border border-field-line bg-white">
           <Icon name="shield" size={18} stroke="#17756B" width={1.9} />
         </IconCircle>
         <span>We never show your transactions, employers, hours or visa details.</span>
       </div>
 
       <div className="grow" />
-      <div className="flex flex-col gap-3">
-        <ButtonLink href="/consent">Get started</ButtonLink>
-        <ButtonLink href="/connect" variant="secondary">I&apos;ll upload a statement instead</ButtonLink>
+      {/* Sticky so the buttons stay on screen even on the smallest phones */}
+      <div className="sticky bottom-0 -mx-5 flex flex-col gap-2 bg-white px-5 pb-4 pt-1">
+        <ButtonLink href="/consent" className="min-h-12!">Get started</ButtonLink>
+        <ButtonLink href="/connect" variant="secondary" className="min-h-12!">I&apos;ll upload a statement instead</ButtonLink>
       </div>
     </div>
   );

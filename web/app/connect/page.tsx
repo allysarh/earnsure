@@ -11,11 +11,15 @@ type Connection = {
   period: string;
 };
 
+type Upload = { filename: string; kind: string };
+
 export default function Connect() {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [banks, setBanks] = useState<string[]>([]);
   const [conn, setConn] = useState<Connection | null>(null);
+  const [upload, setUpload] = useState<Upload | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,6 +46,19 @@ export default function Connect() {
     }
   }
 
+  // Front-end dummy (feature 2): nothing is sent to the API; analysis uses the demo data
+  async function uploadFile(file: File) {
+    setError(null);
+    const kind = file.name.split(".").pop()?.toUpperCase() ?? "";
+    if (kind !== "CSV" && kind !== "PDF") return setError("Upload a CSV or PDF file");
+    setUploading(true);
+    await new Promise((r) => setTimeout(r, 1200));
+    setUpload({ filename: file.name, kind });
+    setUploading(false);
+  }
+
+  const done = !!conn || !!upload;
+
   return (
     <Screen>
       <TopBar title="Step 2 of 3" back="/consent" />
@@ -57,7 +74,7 @@ export default function Connect() {
         {query.trim() && (
           <div className="flex flex-wrap gap-2" aria-live="polite">
             {(banks.length ? banks : ["No match. Demo banks only"]).map((b) => (
-              <button key={b} type="button" onClick={connect} disabled={!banks.length || busy || !!conn}
+              <button key={b} type="button" onClick={connect} disabled={!banks.length || busy || done}
                 className="min-h-11 rounded-full border border-field-line bg-white px-4 text-[14px] font-medium disabled:opacity-60">
                 {b}
               </button>
@@ -81,7 +98,7 @@ export default function Connect() {
             </div>
           ))
         ) : (
-          <button type="button" onClick={connect} disabled={busy}
+          <button type="button" onClick={connect} disabled={busy || done}
             className="flex min-h-[68px] items-center gap-3 border-b border-hair text-left text-[15px] font-medium">
             <IconCircle className="bg-lavender"><Icon name="bank" stroke="#4B3CC4" /></IconCircle>
             <span className="grow">{busy ? "Connecting securely…" : "Connect with Consumer Data Right"}</span>
@@ -98,29 +115,39 @@ export default function Connect() {
         <span className="h-px grow bg-[#ECECF0]" />or<span className="h-px grow bg-[#ECECF0]" />
       </div>
 
-      {/* Placeholder (feature 2): statement upload is not built for the hackathon */}
-      <div aria-disabled="true"
-        className="flex items-start gap-3.5 rounded-card border-[1.5px] border-dashed border-[#CFC8F3] bg-[#FAF9FF] p-4">
+      <label className={`flex items-start gap-3.5 rounded-card border-[1.5px] border-dashed border-[#CFC8F3] bg-[#FAF9FF] p-4 ${
+        busy || uploading || done ? "cursor-default opacity-60" : "cursor-pointer"} has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-primary`}>
+        <input type="file" accept=".csv,.pdf,text/csv,application/pdf" className="sr-only" disabled={busy || uploading || done}
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            e.target.value = "";
+            if (f) uploadFile(f);
+          }} />
         <IconCircle className="bg-pink"><Icon name="upload" /></IconCircle>
-        <span className="flex flex-col gap-0.5">
-          <span className="text-[15px] font-medium">Upload a statement (CSV or PDF) <Pill size="sm">Coming soon</Pill></span>
+        <span className="flex grow flex-col gap-0.5">
+          <span className="text-[15px] font-medium">
+            {upload ? upload.filename : uploading ? "Reading statement…" : "Upload a statement (CSV or PDF)"}
+          </span>
           <span className="text-[13px] leading-[1.45] text-muted">
-            If your bank isn&apos;t listed. Uploaded statements are marked &ldquo;self-uploaded&rdquo; and count as lower confidence.
+            {upload
+              ? `${upload.kind} · marked “self-uploaded”, counts as lower confidence`
+              : <>If your bank isn&apos;t listed. Uploaded statements are marked &ldquo;self-uploaded&rdquo; and count as lower confidence.</>}
           </span>
         </span>
-      </div>
+        {upload && <Pill tone="amber">Uploaded</Pill>}
+      </label>
 
-      {error && <ErrorBox message={error} onRetry={connect} />}
+      {error && <ErrorBox message={error} />}
       <div className="grow" />
-      {conn ? (
+      {done ? (
         <>
           <div className="text-center text-[13px] text-muted">
-            Fetched {conn.transaction_count} transactions · {conn.period}
+            {conn ? `Fetched ${conn.transaction_count} transactions · ${conn.period}` : "Statement uploaded"}
           </div>
           <ButtonLink href="/found">Analyse my earnings</ButtonLink>
         </>
       ) : (
-        <Button onClick={connect} disabled={busy}>{busy ? "Connecting…" : "Connect my bank"}</Button>
+        <Button onClick={connect} disabled={busy || uploading}>{busy ? "Connecting…" : "Connect my bank"}</Button>
       )}
     </Screen>
   );
