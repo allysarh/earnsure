@@ -32,7 +32,7 @@ function ResultCard({ r }: { r: AffordResult }) {
   const t1: Tone = r.share_passed ? "green" : "red";
   const t2: Tone = r.sim_passed ? "green" : "red";
   const what = r.type === "Rent" ? "rent" : r.type.toLowerCase();
-  const per = { Weekly: "a week", Fortnightly: "a fortnight", Monthly: "a month" }[r.frequency];
+  const per = { Weekly: "/week", Fortnightly: "/fortnight", Monthly: "/month" }[r.frequency];
   return (
     <Card highlight={r.colour} className="flex flex-col gap-3.5 p-[18px]">
       <div className="flex items-center gap-3">
@@ -41,7 +41,7 @@ function ResultCard({ r }: { r: AffordResult }) {
         </IconCircle>
         <div>
           <div className="text-[22px] font-semibold tracking-[-0.02em]" style={{ color: TONE_TEXT[r.colour] }}>{r.label}</div>
-          <div className="text-[13px] text-muted">{r.amount.display} {per} {what} · {r.summary}</div>
+          <div className="text-[13px] text-muted">{r.amount.display}{per} {what} · {r.summary}</div>
         </div>
       </div>
       <Meter label="Share of dependable income" pct={r.share} marker={30} tone={t1}

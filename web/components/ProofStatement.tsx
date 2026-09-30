@@ -71,7 +71,7 @@ export default function ProofStatement({ state, checked, snapshot: s, footer }: 
           </Card>
 
           <div className="flex flex-col gap-2 rounded-card bg-soft p-[18px]">
-            <span className="text-[14px] font-medium text-muted">For rent of {s.rent_weekly} a week</span>
+            <span className="text-[14px] font-medium text-muted">For rent of {s.rent_weekly}/week</span>
             <div className="flex items-center gap-3">
               <span className="text-[48px] font-semibold leading-none tracking-[-0.04em]">{s.sim_pass_rate}</span>
               <Pill tone={s.label_colour}>{s.label}</Pill>

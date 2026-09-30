@@ -7,6 +7,16 @@ import { Button, Card, ErrorBox, IconCircle, Loading, Screen, TopBar } from "@/c
 
 const DEFAULT_CHOICE = "one_off_personal";
 
+// What each answer does to the figures (see LABEL_OPTIONS in api/earnsure/config.py)
+const EXPLANATIONS: Record<string, string> = {
+  work_income: "Payments for work count as income, and every figure will be recalculated.",
+  family_support:
+    "Regular family support counts as income, and every figure will be recalculated. Your proof page includes it in your totals but never shows it as a separate item.",
+  one_off_personal:
+    "One-off personal payments aren't counted as income. If it was for work, choose the first option and attach an invoice or message as evidence.",
+  other_in: "Payments marked as something else aren't counted as income. Add a note so you remember what it was.",
+};
+
 function ConfirmForm({ data, index }: { data: Confirmations; index: number }) {
   const router = useRouter();
   const item = data.items[index];
@@ -68,10 +78,8 @@ function ConfirmForm({ data, index }: { data: Confirmations; index: number }) {
           placeholder="e.g. cousin paying back a flight"
           className="resize-none rounded-[22px] border border-field-line bg-field px-[18px] py-3.5 text-[15px]" />
       </div>
-      <p className="m-0 text-[13px] leading-normal text-muted">
-        {choice === "work_income"
-          ? "Payments for work count as income, and every figure will be recalculated."
-          : "One-off personal payments aren't counted as income. If it was for work, choose the first option and attach an invoice or message as evidence."}
+      <p className="m-0 text-[13px] leading-normal text-muted" aria-live="polite">
+        {EXPLANATIONS[choice] ?? EXPLANATIONS[DEFAULT_CHOICE]}
       </p>
 
       {error && <ErrorBox message={error} />}

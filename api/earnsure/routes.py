@@ -102,11 +102,29 @@ def institutions(q: str = "", sid: str = Depends(session_id)):
     return {"institutions": get_bank_provider().list_institutions(q)}
 
 
+@router.get("/institutions/{institution_id}")
+def institution_detail(institution_id: str, sid: str = Depends(session_id)):
+    """Bank and accounts for the simulated bank authorisation page."""
+    provider = get_bank_provider()
+    bank = provider.institution(institution_id)
+    if not bank:
+        raise HTTPException(404, "Unknown bank")
+    consent = get_store().get_session(sid).get("consent_days") or 90
+    return {"institution": bank, "accounts": provider.list_accounts(sid, institution_id), "consent_days": consent}
+
+
+class ConnectIn(BaseModel):
+    institution_id: str | None = Field(default=None, max_length=40)
+
+
 @router.post("/connect")
-def connect(sid: str = Depends(session_id)):
+def connect(body: ConnectIn | None = None, sid: str = Depends(session_id)):
     store = get_store()
     consent = store.get_session(sid).get("consent_days") or 90
-    result = get_bank_provider().connect(sid, consent)
+    institution_id = body.institution_id if body else None
+    if institution_id and not any(b["id"] == institution_id for b in get_bank_provider().list_institutions("")):
+        raise HTTPException(422, "Unknown bank")
+    result = get_bank_provider().connect(sid, consent, institution_id)
     store.update_session(sid, connected_at=datetime.now(SYDNEY).isoformat())
     return result
 
@@ -359,7 +377,7 @@ def current_proof(sid: str = Depends(session_id)):
         "revoked": p["revoked"],
         "opened": {"count": n, "text": {0: "Not yet", 1: "Once", 2: "Twice"}.get(n, f"{n} times"),
                    "last": _opened_display(p)},
-        "answers": f"Rent of {snap['rent_weekly']} a week",
+        "answers": f"Rent of {snap['rent_weekly']}/week",
     }
 
 

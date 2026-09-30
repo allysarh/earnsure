@@ -10,8 +10,18 @@ def test_requires_session():
 
 def test_demo_flow(client):
     assert client.post("/api/consent", json={"consent_days": 90}).status_code == 200
-    conn = client.post("/api/connect").json()
+    banks = client.get("/api/institutions").json()["institutions"]
+    assert len(banks) == 8
+    assert [b["name"] for b in client.get("/api/institutions?q=bank").json()["institutions"]] == \
+        ["Commonwealth Bank", "Macquarie Bank", "Bendigo Bank", "Bank of Queensland"]
+    detail = client.get("/api/institutions/nab").json()
+    assert detail["institution"]["name"] == "NAB" and detail["consent_days"] == 90
+    assert [a["masked_number"] for a in detail["accounts"]] == ["•• 4821", "•• 0937"]
+    assert client.get("/api/institutions/not-a-bank").status_code == 404
+    conn = client.post("/api/connect", json={"institution_id": "nab"}).json()
     assert conn["transaction_count"] == 612 and len(conn["accounts"]) == 2
+    assert conn["institution"]["name"] == "NAB" and conn["accounts"][0]["institution"] == "NAB"
+    assert client.post("/api/connect", json={"institution_id": "not-a-bank"}).status_code == 422
 
     streams = client.get("/api/streams").json()
     assert streams["needs_check"] == 3
@@ -54,7 +64,7 @@ def test_proof_lifecycle_and_privacy(client):
         assert banned not in blob
 
     cur = client.get("/api/proofs/current").json()
-    assert cur["opened"]["count"] == 1 and cur["answers"] == "Rent of $230 a week"
+    assert cur["opened"]["count"] == 1 and cur["answers"] == "Rent of $230/week"
 
     assert client.post(f"/api/proofs/{token}/revoke").status_code == 200
     assert client.get(f"/api/proofs/{token}").json()["state"] == "revoked"

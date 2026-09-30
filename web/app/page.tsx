@@ -2,22 +2,25 @@
 
 import { useEffect } from "react";
 import { api } from "@/lib/api";
+import { clearPrefs } from "@/lib/prefs";
 import { ButtonLink, Icon, IconCircle, Logo } from "@/components/ui";
 
 const STEPS = [
-  { n: 1, bg: "bg-lavender", title: "Connect your bank", body: "Securely, with your consent. Or upload a statement." },
+  { n: 1, bg: "bg-lavender", title: "Connect your bank", body: "Securely connect your bank account in the app, or upload your own statement." },
   { n: 2, bg: "bg-mint", title: "Check what we found", body: "Fix anything we labelled wrong before we calculate." },
-  { n: 3, bg: "bg-pink", title: "Share one verified page", body: "It answers “can they pay?” and nothing more." },
+  { n: 3, bg: "bg-pink", title: "Share one verified page", body: "It answers “can you pay?” and nothing more." },
 ];
 
 export default function Welcome() {
   // Create the demo session (and warm up the Python function) as soon as the app opens.
   useEffect(() => {
-    api("/session", { method: "POST" }).catch(() => {});
+    api<{ new: boolean }>("/session", { method: "POST" })
+      .then((r) => r.new && clearPrefs()) // fresh session: forget the previous run's bank and proof choices
+      .catch(() => {});
   }, []);
 
   return (
-    // Spacing and heading scale with screen height so both buttons fit on one phone screen
+    // Spacing and heading scale with screen height so everything fits on one phone screen
     <div className="flex min-h-dvh flex-col gap-[clamp(10px,1.8dvh,26px)] px-5 pt-3">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
@@ -58,10 +61,9 @@ export default function Welcome() {
       </div>
 
       <div className="grow" />
-      {/* Sticky so the buttons stay on screen even on the smallest phones */}
+      {/* Sticky so the button stays on screen even on the smallest phones */}
       <div className="sticky bottom-0 -mx-5 flex flex-col gap-2 bg-white px-5 pb-4 pt-1">
         <ButtonLink href="/consent" className="min-h-12!">Get started</ButtonLink>
-        <ButtonLink href="/connect" variant="secondary" className="min-h-12!">I&apos;ll upload a statement instead</ButtonLink>
       </div>
     </div>
   );
