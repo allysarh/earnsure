@@ -38,7 +38,8 @@ CI (`.github/workflows/ci.yml`) runs ruff + pytest and lint + typecheck + build 
 
 ## Demo script
 
-Welcome → Consent (90 days) → Connect → Found → confirm T NGUYEN as a gift (then Save through all 3)
+Welcome → Consent (90 days) → Connect (pick a bank → simulated bank sign-in: customer ID `12345678`,
+one-time code `246810`, share both accounts) → Found → confirm T NGUYEN as a gift (then Save through all 3)
 → Home (Watch, $790) → Trends (exam note) → Afford $230 → Proof settings → Create share link → scan the
 QR on a phone → "Genuine and unchanged" → in Supabase, edit `proofs.snapshot` (e.g. `"dependable"`) →
 reload the landlord page → "Could not verify".

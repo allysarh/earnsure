@@ -38,5 +38,39 @@ export function savePrefs(patch: Partial<ProofPrefs>) {
 export function clearPrefs() {
   try {
     sessionStorage.removeItem(KEY);
+    sessionStorage.removeItem(CONNECTION_KEY);
+  } catch {}
+}
+
+// --- Result of the (simulated) bank connection, shown back on the Connect screen ---
+
+export type Institution = { id: string; name: string; initials: string; logo?: string };
+export type Connection = {
+  institution: Institution;
+  accounts: { account_id: string; name: string; masked_number: string; status: string; institution: string }[];
+  transaction_count: number;
+  period: string;
+};
+
+const CONNECTION_KEY = "earnsure.connection";
+
+export function saveConnection(c: Connection) {
+  try {
+    sessionStorage.setItem(CONNECTION_KEY, JSON.stringify(c));
+  } catch {}
+}
+
+export function loadConnection(): Connection | null {
+  try {
+    const raw = sessionStorage.getItem(CONNECTION_KEY);
+    return raw ? (JSON.parse(raw) as Connection) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearConnection() {
+  try {
+    sessionStorage.removeItem(CONNECTION_KEY);
   } catch {}
 }

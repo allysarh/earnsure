@@ -4,6 +4,13 @@ import Link from "next/link";
 import { useApi, type Streams } from "@/lib/api";
 import { ButtonLink, Card, ErrorBox, Icon, IconCircle, Loading, PageTitle, Pill, Screen, SectionLabel, TopBar } from "@/components/ui";
 
+// Front-end dummy: irregular costs aren't detected by the API yet and aren't in any figures
+const IRREGULAR = [
+  { name: "Textbooks and course materials", detail: "2 times · Mar and Jul", total: "$240" },
+  { name: "Doctor and pharmacy", detail: "4 times · no set pattern", total: "$165" },
+  { name: "Bike repair", detail: "Once · May", total: "$120" },
+];
+
 export default function Found() {
   const { data, error, reload } = useApi<Streams>("/streams");
 
@@ -46,7 +53,8 @@ export default function Found() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <SectionLabel>Regular money going out</SectionLabel>
+            <SectionLabel>Money going out</SectionLabel>
+            <div className="px-1 text-[13px] font-medium text-muted">Regular</div>
             <Card className="px-4 py-1">
               {data.outgoing.map((s, i) => (
                 <div key={s.key} className={`flex min-h-[54px] items-center gap-3 ${i < data.outgoing.length - 1 ? "border-b border-hair" : ""}`}>
@@ -58,6 +66,24 @@ export default function Found() {
                 </div>
               ))}
             </Card>
+            <div className="mt-1 px-1 text-[13px] font-medium text-muted">Irregular</div>
+            <Card className="px-4 py-1">
+              {IRREGULAR.map((s, i) => (
+                <div key={s.name} className={`flex min-h-[54px] items-center gap-3 ${i < IRREGULAR.length - 1 ? "border-b border-hair" : ""}`}>
+                  <div className="grow">
+                    <div className="text-[15px] font-medium">{s.name}</div>
+                    <div className="text-[13px] text-muted">{s.detail}</div>
+                  </div>
+                  <div className="flex flex-col items-end gap-[3px]">
+                    <div className="text-[15px] font-semibold">{s.total}</div>
+                    <Pill tone="amber" size="sm">Irregular</Pill>
+                  </div>
+                </div>
+              ))}
+            </Card>
+            <div className="px-1 text-[12px] leading-[1.4] text-muted">
+              Irregular totals cover the whole period and aren&apos;t counted in your regular costs.
+            </div>
           </div>
 
           <div className="flex flex-col gap-2">

@@ -26,6 +26,17 @@ def test_confirming_work_recalculates():
     assert after.weekly_income.sum() == before.weekly_income.sum() + 250
     assert metrics.dependable(after.weekly_income) >= metrics.dependable(before.weekly_income)
     assert metrics.analyse({t_nguyen["txn_id"]: "one_off_personal"}).weekly_income.sum() == before.weekly_income.sum()
+    assert metrics.analyse({t_nguyen["txn_id"]: "other_in"}).weekly_income.sum() == before.weekly_income.sum()
+
+
+def test_regular_family_support_counts_as_income():
+    t_nguyen = classify.confirmation_queue(list(metrics.base_classified()))[0]
+    before = metrics.analyse()
+    after = metrics.analyse({t_nguyen["txn_id"]: "family_support"})
+    assert after.weekly_income.sum() == before.weekly_income.sum() + 250
+    assert metrics.dependable(after.weekly_income) >= metrics.dependable(before.weekly_income)
+    # Not a recurring earnings stream, so it doesn't appear on the "Money coming in" list
+    assert len(classify.income_streams(after.txns)) == 3
 
 
 def test_lean_period_and_recovery():

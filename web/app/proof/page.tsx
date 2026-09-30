@@ -71,7 +71,7 @@ export default function ProofSettings() {
               <Pill tone="green" size="sm">Bank-sourced</Pill>
             </div>
             <div className="text-[19px] font-medium leading-tight tracking-[-0.02em]">
-              Rent of {preview.rent_weekly} a week: {preview.label.toLowerCase()}
+              Rent of {preview.rent_weekly}/week:{preview.label.toLowerCase()}
             </div>
             <div className="flex flex-col gap-2 text-[14px]">
               {[

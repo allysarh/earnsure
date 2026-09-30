@@ -43,9 +43,11 @@ KEYWORDS_OUT = {
 }
 
 # Screen-5 options -> (category, counts_as_income)
+# Product decision (differs from TD §7.1): regular family support counts as income,
+# because it reliably funds the applicant's costs. One-off gifts still don't.
 LABEL_OPTIONS = {
     "work_income": ("Payment for work I did", True),
-    "family_support": ("Regular family support", False),
+    "family_support": ("Regular family support", True),
     "one_off_personal": ("One-off gift or repayment", False),
     "other_in": ("Something else", False),
 }
