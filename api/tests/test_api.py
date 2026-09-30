@@ -1,0 +1,74 @@
+import json
+
+
+def test_requires_session():
+    from fastapi.testclient import TestClient
+
+    from index import app
+    assert TestClient(app).get("/api/health").status_code == 401
+
+
+def test_demo_flow(client):
+    assert client.post("/api/consent", json={"consent_days": 90}).status_code == 200
+    conn = client.post("/api/connect").json()
+    assert conn["transaction_count"] == 612 and len(conn["accounts"]) == 2
+
+    streams = client.get("/api/streams").json()
+    assert streams["needs_check"] == 3
+    assert [s["typical"]["display"] for s in streams["outgoing"]] == ["$210", "$200", "$130", "$45", "$30", "$26"]
+
+    items = client.get("/api/confirmations").json()["items"]
+    assert items[0]["description"] == "FROM T NGUYEN"
+    assert client.post(f"/api/confirmations/{items[0]['txn_id']}", json={"category": "one_off_personal"}).status_code == 200
+    assert client.get("/api/streams").json()["needs_check"] == 2
+
+    h = client.get("/api/health").json()
+    assert (h["status"], h["dependable"]["display"], h["typical_left"]["display"],
+            h["lowest_left"]["display"], h["buffer_weeks"]["display"], h["safe_to_spend"]["display"]) == \
+        ("Watch", "$790", "$537", "$102", "3.7", "$393")
+
+    t = client.get("/api/trends").json()
+    assert [d["amount"]["display"] for d in t["drops"]] == ["$420", "$450", "$480"]
+    assert t["note"]["label"] == "Exam period: reduced shifts (June 2026)."
+
+    r = client.post("/api/affordability", json={"type": "Rent", "amount": 230, "frequency": "Weekly"}).json()
+    assert r["result"]["label"] == "Likely affordable"
+    assert [w["label"] for w in r["what_if"]] == ["Possible, some risk", "Unlikely"]
+
+
+def test_proof_lifecycle_and_privacy(client):
+    created = client.post("/api/proofs", json={"valid_days": 30, "show_chart": False, "include_note": True}).json()
+    token = created["token"]
+    assert token == "7KQ4-M2X9" and created["statement_no"] == "ES-7KQ4M2X9"
+
+    public = client.get(f"/api/proofs/{token}").json()
+    assert public["state"] == "verified"
+    snap = public["snapshot"]
+    assert snap["share"] == "29%" and snap["sim_pass_rate"] == "94%" and snap["rent_paid_weeks"] == "26 of 26"
+    assert snap["note_label"] == "Exam period: reduced shifts (June 2026)."
+    assert "weekly_series" not in snap
+
+    blob = json.dumps(snap).upper()
+    for banned in ("4821", "0937", "VISA", "REMITTANCE", "QUICKDROP", "BEAN", "STUDIO MOSS", "WISE", "NGUYEN"):
+        assert banned not in blob
+
+    cur = client.get("/api/proofs/current").json()
+    assert cur["opened"]["count"] == 1 and cur["answers"] == "Rent of $230 a week"
+
+    assert client.post(f"/api/proofs/{token}/revoke").status_code == 200
+    assert client.get(f"/api/proofs/{token}").json()["state"] == "revoked"
+
+
+def test_tampered_snapshot_in_store(client):
+    from earnsure.db import get_store
+    token = client.post("/api/proofs", json={}).json()["token"]
+    store = get_store()
+    p = store.get_proof(token)
+    store.update_proof(token, snapshot=dict(p["snapshot"], dependable="$990"))
+    assert client.get(f"/api/proofs/{token}").json()["state"] == "invalid"
+
+
+def test_chart_only_when_opted_in(client):
+    token = client.post("/api/proofs", json={"show_chart": True, "include_note": False}).json()["token"]
+    snap = client.get(f"/api/proofs/{token}").json()["snapshot"]
+    assert len(snap["weekly_series"]) == 26 and "note_label" not in snap

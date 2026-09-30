@@ -1,0 +1,12 @@
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "UP", "DTZ", "RUF"]
+# E402: index.py adjusts sys.path before imports; RUF001/003: "–" and "·" are intended copy;
+# B008: FastAPI's Depends()/Cookie() defaults
+ignore = ["E402", "RUF001", "RUF003", "B008"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

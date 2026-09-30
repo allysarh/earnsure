@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+/* Design tokens from the prototype (TD §10) */
+@theme {
+  --font-sans: var(--font-jakarta), system-ui, sans-serif;
+
+  --color-ink: #111117;
+  --color-muted: #6b6b76;
+  --color-sub: #55555f;
+  --color-soft: #f5f5f7;
+  --color-hair: #f0f0f3;
+  --color-field: #f7f7f9;
+  --color-field-line: #e6e6eb;
+  --color-btn: #f3f3f5;
+  --color-line: #d9d9df;
+  --color-track: #ededf1;
+
+  --color-primary: #6b5ce7;
+  --color-primary-dark: #4b3cc4;
+  --color-lavender: #e4dffd;
+  --color-mint: #cdefea;
+  --color-pink: #f5d2f4;
+  --color-highlight: #d9bff5;
+  --color-violet-soft: #f8f5ff;
+
+  --color-green: #17756b;
+  --color-green-ink: #0f5e55;
+  --color-green-line: #7fcbbf;
+  --color-amber: #6b4508;
+  --color-amber-bg: #fdf4e3;
+  --color-amber-line: #e7c27a;
+  --color-amber-strong: #95600c;
+  --color-red: #b0381f;
+  --color-red-ink: #8e2c18;
+  --color-red-line: #e9a393;
+  --color-red-bg: #fbe3dd;
+  --color-lean: #d9912b;
+  --color-bar: #8f80f0;
+  --color-night: #17171f;
+
+  --radius-card: 28px;
+  --radius-tile: 24px;
+  --shadow-card: 0 10px 30px rgba(24, 24, 40, 0.07);
+  --shadow-cta: 0 10px 24px rgba(107, 92, 231, 0.28);
+  --shadow-nav: 0 16px 32px rgba(23, 23, 31, 0.3);
+}
+
+html {
+  background: #ededf1;
+}
+
+body {
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2 {
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
